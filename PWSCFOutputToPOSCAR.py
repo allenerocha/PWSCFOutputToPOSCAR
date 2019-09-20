@@ -1,13 +1,12 @@
+#!/usr/bin/python
 # Version 2.1
 # Changes:
-#   Added a if __name__(): == main:
-#   Added support for *.unfinished and
-#   the scf.out file format
-#   Fixed bugs
+#   Added shabang
+#   Changed some possible future bugs with formats
 
 from sys import argv
-import os
 import re
+
 
 def main():
     class atom:
@@ -46,9 +45,7 @@ def main():
             return self.length
 
     def check_file(input_file=''):
-        # simple check to see if the user input a *.out or *.unfinished file
-        file_type = input_file.split('.')[-1]
-        if file_type != 'out' and file_type != 'unfinished':
+        if '.out' not in input_file_path and '.unfinished' not in input_file_path:
             print('Invalid file type.')
             print('Expected a *.out, received a *.{}.'.format(input_file.split('.')[-1]))
             exit()
@@ -302,7 +299,6 @@ def main():
             for line in lines:
                 atomic_positions_bound += 1
                 # break out of the loop when key word is found
-###################################################################
                 if 'site n' in line:
                     break
             ato_pos = lines[atomic_positions_bound:]
@@ -320,7 +316,6 @@ def main():
                         a_p.append(ap.split('_')[index])
                     if not ap.split('_')[index].isdigit() and ap.split('_')[index] != 'tau':
                         a_p.append(ap.split('_')[index])
-######################################################################
             # adds the atomic positions to the list of element classes
             a_p = a_p[:-1]
             for index in range(len(a_p)):
@@ -353,11 +348,9 @@ def main():
     file_type = input_file_path.split('.')[-1]
     file_format = ''
 
-    if file_type == 'out':
-        file_format = input_file_path.split('.')[-2]
-
-    else:
-        file_format = input_file_path.split('.')[-3]
+    for w in input_file_path.split('.'):
+        if w == 'vc-relax' or w == 'scf':
+            file_format = w
 
     # if the user does not wish to change the directory
     output_file_path = ''
