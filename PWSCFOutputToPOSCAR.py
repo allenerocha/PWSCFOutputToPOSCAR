@@ -1,10 +1,9 @@
 #!/usr/bin/python
-# Version 2.1
+# Version 3.0
 # Changes:
-#   Added shabang
-#   Changed some possible future bugs with formats
+#   Added standard input functionality
 
-from sys import argv
+from sys import argv, stdin
 import re
 
 
@@ -338,15 +337,27 @@ def main():
                                 elements[-1].increase_length()
         return elements
 
-    # file to be parsed (including path)
-    input_file_path = argv[1]
+    input_file_path = ''
+    file_format = ''
+
+    # read from standard input mode
+    if argv[1] == '-stdin':
+        input_file_path = '{}.{}.{}.out'.format(argv[2], argv[3], argv[4])
+        with open(input_file_path, 'w') as data_file:
+            if not stdin.isatty():
+                lines = stdin
+                for line in lines:
+                    data_file.write(line)
+
+    else:
+        # file to be parsed (including path)
+        input_file_path = argv[1]
 
     # call to check the inputted file
     check_file(input_file_path)
 
     # assigns both the file type and format
     file_type = input_file_path.split('.')[-1]
-    file_format = ''
 
     for w in input_file_path.split('.'):
         if w == 'vc-relax' or w == 'scf':
@@ -356,13 +367,17 @@ def main():
     output_file_path = ''
 
     # the user wants to save the file in a new directory
-    if len(argv) == 3:
+    if len(argv) == 3 or len(argv) == 6:
         # sets the output file path to a new location
-        output_file_path = argv[2]
+        output_file_path = argv[len(argv) - 1]
 
     # parses the file based on the type and format of the file
     lines = parse_file(file_type, file_format, input_file_path)
-    file_name = ''.join(str(e + '.') for e in input_file_path.split('/')[-1].split('.')[0:2])
+    file_name = ''
+    if argv[1] == '-stdin':
+        file_name = '{}.{}.'.format(argv[2], argv[3])
+    else:
+        file_name = ''.join(str(e + '.') for e in input_file_path.split('/')[-1].split('.')[0:2])
     # opens/creates output file to write
     with open('{}{}POSCAR.VASP'.format(output_file_path, file_name), 'w') as out_file:
 
