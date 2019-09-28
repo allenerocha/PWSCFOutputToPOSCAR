@@ -43,10 +43,16 @@ def main():
         def leng(self):
             return self.length
 
+    def display_help():
+        with open('README.md','r') as help_file:
+            for line in help_file.readlines():
+                print(line.rstrip())
+
     def check_file(input_file=''):
         if '.out' not in input_file_path and '.unfinished' not in input_file_path:
             print('Invalid file type.')
             print('Expected a *.out, received a *.{}.'.format(input_file.split('.')[-1]))
+            display_help()
             exit()
 
     def parse_file(file_type='', file_format='', input_file_path=''):
@@ -195,57 +201,34 @@ def main():
                     lattice_flag = True
         return lattice_vectors
 
+    def parse_atomic_postions(a_p, elements):
+        for index in range(len(a_p)):
+            if (index % 4) == 0:
+                # initial addition of element
+                if len(elements) == 0:
+                    # adds the element and its properties to the list
+                    elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
+                    # manually increase the length of the vectors
+                    elements[-1].increase_length()
+                else:
+                    for j in range(len(elements)):
+                        if a_p[index] == elements[j].get_symbol():
+                            elements[j].add_vector(a_p[index + 1], a_p[index + 2], a_p[index + 3])
+                            break
+                        elif j == (len(elements) - 1):
+                            # adds the element and its properties to the list
+                            elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
+                            # manually increase the length of the vectors
+                            elements[-1].increase_length()
+        return elements
+
     # iterates through the list of lines looking for the atomic positions:
     # uses a regex to look for the lattice vectors depending on the file type format
     # site n.     atom                  positions (alat units)  <-*.scf.*
     def get_atomic_positions(lines=[], file_type='', file_format=''):
-        index = 0
         elements = []
-        # input file was in vc-relax format
-        if file_format == 'vc-relax' and file_type == 'out':
-            # bound for the atomic position parsing
-            atomic_positions_bound = 0
-            # iterate through all the lines in the list
-            for line in lines:
-                atomic_positions_bound += 1
-                # break out of the loop when key word is found
-                if 'ATOMIC_POSITIONS' in line:
-                    break
-            ato_pos = lines[atomic_positions_bound:]
-            atomic_positions = []
-            # format the list to remove redundant spacing
-            for at_po in ato_pos:
-                atomic_positions.append(re.sub(r'\s+', ' ', at_po))
-            a_p = []
 
-            # add elements to the list of objects
-            for ap in atomic_positions:
-                for index in range(len(ap.split(' '))):
-                    if ap.split(' ')[index] != '0':
-                        if len(elements) is 0:
-                            a_p.append(ap.split(' ')[index])
-
-            # adds the atomic positions to the list of element classes
-            for index in range(len(a_p)):
-                if (index % 4) == 0:
-                    # initial addition of element
-                    if len(elements) == 0:
-                        # adds the element and its properties to the list
-                        elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                        # manually increase the length of the vectors
-                        elements[-1].increase_length()
-                    else:
-                        for j in range(len(elements)):
-                            if a_p[index] == elements[j].get_symbol():
-                                elements[j].add_vector(a_p[index + 1], a_p[index + 2], a_p[index + 3])
-                                break
-                            elif j == (len(elements) - 1):
-                                # adds the element and its properties to the list
-                                elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                                # manually increase the length of the vectors
-                                elements[-1].increase_length()
-
-        elif file_format == 'vc-relax' and file_type == 'unfinished':
+        if file_format == 'vc-relax':
             # bound for the atomic position parsing
             atomic_positions_bound = 0
             # iterate through all the lines in the list
@@ -260,7 +243,8 @@ def main():
             for at_po in ato_pos:
                 atomic_positions.append(re.sub(r'\s+', ' ', at_po))
 
-            atomic_positions = list(filter(None, atomic_positions))
+            if file_type == 'unfinished':
+                atomic_positions = list(filter(None, atomic_positions))
 
             a_p = []
             # add elements to the list of objects
@@ -271,24 +255,7 @@ def main():
                             a_p.append(ap.split(' ')[index])
 
             # adds the atomic positions to the list of element classes
-            for index in range(len(a_p)):
-                if (index % 4) == 0:
-                    # initial addition of element
-                    if len(elements) == 0:
-                        # adds the element and its properties to the list
-                        elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                        # manually increase the length of the vectors
-                        elements[-1].increase_length()
-                    else:
-                        for j in range(len(elements)):
-                            if a_p[index] == elements[j].get_symbol():
-                                elements[j].add_vector(a_p[index + 1], a_p[index + 2], a_p[index + 3])
-                                break
-                            elif j == (len(elements) - 1):
-                                # adds the element and its properties to the list
-                                elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                                # manually increase the length of the vectors
-                                elements[-1].increase_length()
+            elements = parse_atomic_postions(a_p, elements)
 
         # input file was in scf format
         elif file_format == 'scf' and file_type == 'out':
@@ -317,28 +284,15 @@ def main():
                         a_p.append(ap.split('_')[index])
             # adds the atomic positions to the list of element classes
             a_p = a_p[:-1]
-            for index in range(len(a_p)):
-                if (index % 4) == 0:
-                    # initial addition of element
-                    if len(elements) == 0:
-                        # adds the element and its properties to the list
-                        elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                        # manually increase the length of the vectors
-                        elements[-1].increase_length()
-                    else:
-                        for j in range(len(elements)):
-                            if a_p[index] == elements[j].get_symbol():
-                                elements[j].add_vector(a_p[index + 1], a_p[index + 2], a_p[index + 3])
-                                break
-                            elif j == (len(elements) - 1):
-                                # adds the element and its properties to the list
-                                elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
-                                # manually increase the length of the vectors
-                                elements[-1].increase_length()
+            elements = parse_atomic_postions(a_p,elements)
         return elements
 
     input_file_path = ''
     file_format = ''
+
+    if argv[1] == '-help' or argv[1] == 'help' or argv[1] == 'h':
+        display_help()
+        exit()
 
     # read from standard input mode
     if argv[1] == '-stdin':
@@ -378,6 +332,7 @@ def main():
         file_name = '{}.{}.'.format(argv[2], argv[3])
     else:
         file_name = ''.join(str(e + '.') for e in input_file_path.split('/')[-1].split('.')[0:2])
+    print(output_file_path)
     # opens/creates output file to write
     with open('{}{}POSCAR.VASP'.format(output_file_path, file_name), 'w') as out_file:
 

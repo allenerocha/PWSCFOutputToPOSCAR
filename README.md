@@ -1,4 +1,23 @@
 # PWSCFOutputToPOSCAR
+
+./PWSCFOutputToPOSCAR.py [ARGUMENT] [OPTION 1] [OPTION 2] [OPTION 3] [OPTION 4]
+
+    [ARGUMENT]                          [DESCRIPTION]
+    -stdin                              read from standard input and output the .out & .vasp files
+        [OPTION 1]                      chemical formula
+        [OPTION 2]                      symmetry group
+        [OPTION 3]                      file format
+        [OPTION 4]                      output path (empty for the same directory)
+        
+    -f                                  read from file
+        [OPTION 1]                      full filepath of input file
+        [OPTION 2]                      file output path with trailing '/' 
+                                        (empty for filepath of input file)
+                                        
+    help -help -h                       display this file in the terminal
+        
+      
+
 Python script (command line executable) to take Quantum ESPRESSO pw.x vc-relax output (example: Si.Fd-3m.vc-relax.out) and generate VASP POSCAR file named [element].[symmetry group].POSCAR.VASP in file format below, converting vc-relax output alat from Bohr to Angstrom (multiply by 0.529177)
 
 POSCAR File Format
@@ -34,3 +53,5 @@ Direct                                                    [atom coordinates in t
  
 
 =================
+
+contact allenerocha@pm.me for any questions or inquires
