@@ -1,7 +1,4 @@
-#!/usr/bin/python
-# Version 3.0
-# Changes:
-#   Added standard input functionality
+#!/usr/bin/env python3
 
 from sys import argv, stdin
 import re
@@ -9,7 +6,14 @@ import re
 
 def main():
     class atom:
-        def __init__(self, symbol, x_pos, y_pos, z_pos):
+        def __init__(self, symbol: str, x_pos: float, y_pos: float, z_pos: float) -> None:
+            """
+            constructor for creating a new element object
+            :param symbol: elemental symbol
+            :param x_pos: vector x-component of element
+            :param y_pos: vector y-component of element
+            :param z_pos: vector z-component of element
+            """
             self.symbol = symbol
             self.x_pos = []
             self.x_pos.append(x_pos)
@@ -19,43 +23,89 @@ def main():
             self.z_pos.append(z_pos)
             self.length = 0
 
-        def get_symbol(self):
+        def get_symbol(self) -> str:
+            """
+            :return: element symbol
+            """
             return self.symbol
 
-        def add_vector(self, x_pos, y_pos, z_pos):
+        def add_vector(self, x_pos: float, y_pos: float, z_pos: float) -> None:
+            """
+            adds a new vector this element object
+            :param x_pos: vector x-component of element
+            :param y_pos: vector y-component of element
+            :param z_pos: vector z-component of element
+            :return: None
+            """
             self.x_pos.append(x_pos)
             self.y_pos.append(y_pos)
             self.z_pos.append(z_pos)
             self.length += 1
 
-        def get_x_pos(self, i):
-            return self.x_pos[i]
+        def get_x_pos(self, index: int) -> float:
+            """
+            returns the x position of an element in the desired index
+            :param index: desired index
+            :return: vector x-component of the element in the desired index
+            """
+            return self.x_pos[index]
 
-        def get_y_pos(self, i):
-            return self.y_pos[i]
+        def get_y_pos(self, index: int) -> float:
+            """
+            returns the x position of an element in the desired index
+            :param index: desired index
+            :return: vector y-component of the element in the desired index
+            """
+            return self.y_pos[index]
 
-        def get_z_pos(self, i):
-            return self.z_pos[i]
+        def get_z_pos(self, index: int) -> float:
+            """
+            returns the x position of an element in the desired index
+            :param index: desired index
+            :return: vector z-component of the element in the desired index
+            """
+            return self.z_pos[index]
 
-        def increase_length(self):
+        def increment_size(self) -> None:
+            """
+            increments the amount of elements
+            :return: None
+            """
             self.length += 1
 
-        def leng(self):
+        def size(self) -> int:
+            """
+            returns the amount of elements
+            :return: magnitude of the elements
+            """
             return self.length
 
-    def display_help():
-        with open('README.md','r') as help_file:
+    def display_help() -> None:
+        """
+        Displays the README.md file
+        :return: None
+        """
+        with open('README.md', 'r') as help_file:
             for line in help_file.readlines():
                 print(line.rstrip())
 
-    def check_file(input_file=''):
+    def check_file(input_file: str) -> None:
+        """
+        Checks if the input file is valid
+        :param input_file: path of the file
+        :return: None
+        """
         if '.out' not in input_file_path and '.unfinished' not in input_file_path:
-            print('Invalid file type.')
-            print('Expected a *.out, received a *.{}.'.format(input_file.split('.')[-1]))
-            display_help()
-            exit()
+            raise TypeError('Invalid file type! Expected a *.out, received a *.{}.\nUse -h for help.'.format(input_file.split('.')[-1]))
 
-    def parse_file(file_type='', file_format='', input_file_path=''):
+    def parse_file(file_type: str, file_format: str, input_file_path: str) -> list:
+        """
+        Goes throught the file to extract the useful information
+        :param file_type: file extension
+        :param file_format: format of the file
+        :param input_file_path: location of the file
+        :return: None
+        """
         lines = []
         # vcf format
         # tries to open
@@ -141,13 +191,16 @@ def main():
             print(str(e))
             exit()
 
-    # uses a regex to search for the line:
-    # CELL_PARAMETERS (alat= [NUMBER])                  <-*.vc-relax.*
-    # or
-    # lattice parameter (alat)  =      [NUMBER]  a.u    <-*.scf.*
-    # depending on the file type format
-    def get_lattice_parameter(lines=[], file_format=''):
+    def get_lattice_parameter(lines: list, file_format: str) -> str:
+        """
+        Uses a regular expression to filter find the lattice parameter
+        :param lines: list of the saved lines from the input file
+        :param file_format: formatting of the file
+        :return: None
+        """
         # input file was in vc-relax format
+        if lines is None:
+            lines = []
         regex = re.compile(r'[^0-9.]')
         lattice_parameter = ''
         if file_format == 'vc-relax':
@@ -163,14 +216,16 @@ def main():
                     lattice_parameter = str(float(re.sub(r'\s+', ' ', line).split(' ')[4]) * 0.529177)
         return lattice_parameter
 
-    # iterates through the list of lines looking for the lattice vectors:
-    # uses a regex to look for the lattice vectors depending on the file type format
-    # next line after:
-    # new lattice vectors (alat unit) :                         <*.out.unfinished
-    # or
-    # Final estimate of lattice vectors (input alat units)      <*.out
-    # next line after:
-    def get_lattice_vectors(lines=[], file_type='', file_format=''):
+    def get_lattice_vectors(lines: list, file_type: str, file_format: str) -> list:
+        """
+        Parses the lattice vectors from the lines passed
+        :param lines: list of lines parsed from the data entry
+        :param file_type: extension of the file
+        :param file_format: format of the data
+        :return: lattice vectors as a list
+        """
+        if lines is None:
+            lines = []
         lattice_vectors = []
         # input file was in vc-relax format
         if file_format == 'vc-relax':
@@ -201,7 +256,13 @@ def main():
                     lattice_flag = True
         return lattice_vectors
 
-    def parse_atomic_postions(a_p, elements):
+    def parse_atomic_positions(a_p: list, elements: list) -> list:
+        """
+        Cleans the atomic positions from the list of lines
+        :param a_p: Uncleaned lines containing the atomic positions
+        :param elements: list of elements
+        :return: Cleaned list of the atomic positions
+        """
         for index in range(len(a_p)):
             if (index % 4) == 0:
                 # initial addition of element
@@ -209,7 +270,7 @@ def main():
                     # adds the element and its properties to the list
                     elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
                     # manually increase the length of the vectors
-                    elements[-1].increase_length()
+                    elements[-1].increment_size()
                 else:
                     for j in range(len(elements)):
                         if a_p[index] == elements[j].get_symbol():
@@ -219,14 +280,19 @@ def main():
                             # adds the element and its properties to the list
                             elements.append(atom(a_p[index], a_p[index + 1], a_p[index + 2], a_p[index + 3]))
                             # manually increase the length of the vectors
-                            elements[-1].increase_length()
+                            elements[-1].increment_size()
         return elements
 
-    # iterates through the list of lines looking for the atomic positions:
-    # uses a regex to look for the lattice vectors depending on the file type format
-    # site n.     atom                  positions (alat units)  <-*.scf.*
-    def get_atomic_positions(lines=[], file_type='', file_format=''):
-        elements = []
+    def get_atomic_positions(lines: list, file_type: str, file_format: str) -> list:
+        """
+        Retrieves the atomic positions from the cleaned lines
+        :param lines: lines of the data
+        :param file_type: file extension
+        :param file_format: formatting of the data
+        :return: list of the atomic positions
+        """
+
+        elements = list()
 
         if file_format == 'vc-relax':
             # bound for the atomic position parsing
@@ -255,7 +321,7 @@ def main():
                             a_p.append(ap.split(' ')[index])
 
             # adds the atomic positions to the list of element classes
-            elements = parse_atomic_postions(a_p, elements)
+            elements = parse_atomic_positions(a_p, elements)
 
         # input file was in scf format
         elif file_format == 'scf' and file_type == 'out':
@@ -284,12 +350,11 @@ def main():
                         a_p.append(ap.split('_')[index])
             # adds the atomic positions to the list of element classes
             a_p = a_p[:-1]
-            elements = parse_atomic_postions(a_p,elements)
+            elements = parse_atomic_positions(a_p, elements)
         return elements
 
     input_file_path = ''
     file_format = ''
-
     if argv[1] == '-help' or argv[1] == 'help' or argv[1] == 'h':
         display_help()
         exit()
@@ -332,7 +397,6 @@ def main():
         file_name = '{}.{}.'.format(argv[2], argv[3])
     else:
         file_name = ''.join(str(e + '.') for e in input_file_path.split('/')[-1].split('.')[0:2])
-    print(output_file_path)
     # opens/creates output file to write
     with open('{}{}POSCAR.VASP'.format(output_file_path, file_name), 'w') as out_file:
 
@@ -385,7 +449,7 @@ def main():
                     out_file.write('   ')
                 # second row (amount of vectors)
                 else:
-                    out_file.write(str(e.leng()))
+                    out_file.write(str(e.size()))
                     out_file.write('  ')
 
             out_file.write('\n')
@@ -397,7 +461,7 @@ def main():
 
         for e in elements:
             # rows
-            for row in range(e.leng()):
+            for row in range(e.size()):
                 # case 1: first component is negative
                 if e.get_x_pos(row)[0] == '-':
                     out_file.write('     {}'.format(e.get_x_pos(row)))
@@ -428,7 +492,7 @@ def main():
 
         # get total amount of elements
         for e in elements:
-            total_elements += e.leng()
+            total_elements += e.size()
 
         for i in range(total_elements):
             out_file.write('  0.00000000E+00  0.00000000E+00  0.00000000E+00')
