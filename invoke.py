@@ -1,0 +1,2 @@
+import PWSCFOutputToPOSCAR.PWSCFOutputToPOSCAR
+PWSCFOutputToPOSCAR.PWSCFOutputToPOSCAR.main()

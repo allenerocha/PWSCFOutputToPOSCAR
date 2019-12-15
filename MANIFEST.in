@@ -1,0 +1,2 @@
+include invoke README LICENSE
+recursive-include input_file *

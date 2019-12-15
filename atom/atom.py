@@ -1,4 +1,16 @@
+"""Object to hold the properties of the atoms in the computation"""
+
+
 class Atom:
+    """Object to hold the properties of the atoms in the computation
+    __init__ ():
+    add_vector(float, float, float) -> None
+    get_x_pos(int) -> float
+    get_y_pos(int) -> float
+    get_z_pos(int) -> float
+    increment_size() -> None
+    size()->int"""
+
     def __init__(self, symbol: str, x_pos: float, y_pos: float, z_pos: float) -> None:
         """
         constructor for creating a new element object
