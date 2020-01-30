@@ -21,10 +21,10 @@
 
     Reading from standard input
         Output the .out file and the .POSCAR.VASP file to the relative directory 'output_files'.
-        ./PWSCFOutputToPOSCAR.py -stdin Si Fd-3m scf output_files/
+        [Quantum ESPRESSO call] | ./PWSCFOutputToPOSCAR.py -stdin Si Fd-3m scf output_files/
 
         Output the .out file and the .POSCAR.VASP file to the current path.
-        ./PWSCFOutputToPOSCAR.py -stdin Si Fd-3m scf
+        [Quantum ESPRESSO call] | ./PWSCFOutputToPOSCAR.py -stdin Si Fd-3m scf
         
     Reading from input file
         Read from input file 'Si.Fd-3m.scf.out' located in the relative directory 'input_files' and save the .VASP output to the relative directory 'output_files'.
